@@ -14,6 +14,8 @@ class CameraViewController: UIViewController,
     AVCaptureAudioDataOutputSampleBufferDelegate,
     AVCaptureVideoDataOutputSampleBufferDelegate {
     
+    private let recordingQueue = DispatchQueue(label: "recording.queue")
+    
     enum CameraMode {
         case photo
         case camera
@@ -27,22 +29,15 @@ class CameraViewController: UIViewController,
     private var videoOutput: AVCaptureVideoDataOutput = AVCaptureVideoDataOutput()
     private var audioOutput: AVCaptureAudioDataOutput = AVCaptureAudioDataOutput()
     
-    private var videoDevice: AVCaptureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
-    private var audioConnection: AVCaptureConnection?
-    private var videoConnection: AVCaptureConnection?
-    
     private var assetWriter: AVAssetWriter?
-    private var audioInput: AVAssetWriterInput = AVAssetWriterInput(mediaType: AVMediaTypeAudio,
+    private var audioWriterInput: AVAssetWriterInput = AVAssetWriterInput(mediaType: AVMediaTypeAudio,
         outputSettings: audioSettings)
-    private var videoInput: AVAssetWriterInput = AVAssetWriterInput(mediaType: AVMediaTypeVideo, outputSettings: videoSettings)
+    private var videoWriterInput: AVAssetWriterInput = AVAssetWriterInput(mediaType: AVMediaTypeVideo, outputSettings: videoSettings)
     
-    private var fileManager: FileManager = FileManager()
     private var recordingURL: URL?
     
     private var isCameraRecording: Bool = false
     private var isRecordingSessionStarted: Bool = false
-    
-    private var recordingQueue = DispatchQueue(label: "recording.queue")
 
     private static let audioSettings: [String : Any] = [
         AVFormatIDKey : kAudioFormatAppleIMA4,
@@ -52,7 +47,7 @@ class CameraViewController: UIViewController,
     private static let videoSettings: [String : Any] = [
         AVVideoCodecKey : AVVideoCodecH264,
         AVVideoWidthKey : UIScreen.main.bounds.width,
-        AVVideoHeightKey : UIScreen.main.bounds.width
+        AVVideoHeightKey : UIScreen.main.bounds.height
     ]
     
     @IBAction func recordingButton(_ sender: Any) {
@@ -85,22 +80,24 @@ class CameraViewController: UIViewController,
             fileURL = URL(fileURLWithPath: "\(NSTemporaryDirectory() as String)/image.mp4")
         }
         self.recordingURL = fileURL
-        if self.fileManager.isDeletableFile(atPath: fileURL.path) {
-            _ = try? self.fileManager.removeItem(atPath: fileURL.path)
+        let fileManager = FileManager()
+        if fileManager.isDeletableFile(atPath: fileURL.path) {
+            _ = try? fileManager.removeItem(atPath: fileURL.path)
         }
     }
     
     private func initialize() {
         self.session.sessionPreset = AVCaptureSessionPresetHigh
-        self.videoInput.expectsMediaDataInRealTime = true
-        self.audioInput.expectsMediaDataInRealTime = true
+        self.videoWriterInput.expectsMediaDataInRealTime = true
+        self.audioWriterInput.expectsMediaDataInRealTime = true
         
         do {
             if let fileURL = self.recordingURL {
                 self.assetWriter = try AVAssetWriter(outputURL: fileURL,
                     fileType: AVFileTypeQuickTimeMovie)
             }
-            self.deviceInput = try AVCaptureDeviceInput(device: self.videoDevice)
+            let videoDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
+            self.deviceInput = try AVCaptureDeviceInput(device: videoDevice)
         } catch {
             print(error.localizedDescription)
         }
@@ -115,11 +112,11 @@ class CameraViewController: UIViewController,
             assertionFailure("AssetWriter was not initialized")
             return
         }
-        if assetWriter.canAdd(self.videoInput) {
-            assetWriter.add(self.videoInput)
+        if assetWriter.canAdd(self.videoWriterInput) {
+            assetWriter.add(self.videoWriterInput)
         }
-        if assetWriter.canAdd(self.audioInput) {
-            assetWriter.add(self.audioInput)
+        if assetWriter.canAdd(self.audioWriterInput) {
+            assetWriter.add(self.audioWriterInput)
         }
     }
     
@@ -141,10 +138,14 @@ class CameraViewController: UIViewController,
             if self.session.canAddOutput(self.videoOutput) {
                 self.session.addOutput(self.videoOutput)
             }
-            self.videoConnection = self.videoOutput.connection(withMediaType: AVMediaTypeVideo)
-            if self.videoConnection?.isVideoStabilizationSupported == true {
-                self.videoConnection?.preferredVideoStabilizationMode = .auto
+            
+            if let videoConnection = self.videoOutput.connection(withMediaType: AVMediaTypeVideo) {
+                if videoConnection.isVideoStabilizationSupported {
+                    videoConnection.preferredVideoStabilizationMode = .auto
+                }
+                videoConnection.videoOrientation = .portrait
             }
+            
             self.session.commitConfiguration()
             let audioDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeAudio)
             let audioIn = try? AVCaptureDeviceInput(device: audioDevice)
@@ -156,8 +157,6 @@ class CameraViewController: UIViewController,
             if self.session.canAddOutput(self.audioOutput) {
                 self.session.addOutput(self.audioOutput)
             }
-            
-            self.audioConnection = self.audioOutput.connection(withMediaType: AVMediaTypeAudio)
         }
     }
     
@@ -196,14 +195,14 @@ class CameraViewController: UIViewController,
         let description = CMSampleBufferGetFormatDescription(sampleBuffer)!
         
         if CMFormatDescriptionGetMediaType(description) == kCMMediaType_Audio {
-            if self.audioInput.isReadyForMoreMediaData {
+            if self.audioWriterInput.isReadyForMoreMediaData {
                 print("appendSampleBuffer audio");
-                self.audioInput.append(sampleBuffer)
+                self.audioWriterInput.append(sampleBuffer)
             }
         } else {
-            if self.videoInput.isReadyForMoreMediaData {
+            if self.videoWriterInput.isReadyForMoreMediaData {
                 print("appendSampleBuffer video");
-                if !self.videoInput.append(sampleBuffer) {
+                if !self.videoWriterInput.append(sampleBuffer) {
                     print("Error writing video buffer");
                 }
             }
