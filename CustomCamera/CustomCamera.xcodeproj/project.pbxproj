@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2FCA4DA61F025236004754A3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCA4DA51F025236004754A3 /* AppDelegate.swift */; };
-		2FCA4DA81F025236004754A3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCA4DA71F025236004754A3 /* ViewController.swift */; };
+		2FCA4DA81F025236004754A3 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCA4DA71F025236004754A3 /* CameraViewController.swift */; };
 		2FCA4DAB1F025236004754A3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2FCA4DA91F025236004754A3 /* Main.storyboard */; };
 		2FCA4DAD1F025236004754A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2FCA4DAC1F025236004754A3 /* Assets.xcassets */; };
 		2FCA4DB01F025236004754A3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2FCA4DAE1F025236004754A3 /* LaunchScreen.storyboard */; };
@@ -17,7 +17,7 @@
 /* Begin PBXFileReference section */
 		2FCA4DA21F025236004754A3 /* CustomCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CustomCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FCA4DA51F025236004754A3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		2FCA4DA71F025236004754A3 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		2FCA4DA71F025236004754A3 /* CameraViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		2FCA4DAA1F025236004754A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		2FCA4DAC1F025236004754A3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2FCA4DAF1F025236004754A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -55,7 +55,7 @@
 			isa = PBXGroup;
 			children = (
 				2FCA4DA51F025236004754A3 /* AppDelegate.swift */,
-				2FCA4DA71F025236004754A3 /* ViewController.swift */,
+				2FCA4DA71F025236004754A3 /* CameraViewController.swift */,
 				2FCA4DA91F025236004754A3 /* Main.storyboard */,
 				2FCA4DAC1F025236004754A3 /* Assets.xcassets */,
 				2FCA4DAE1F025236004754A3 /* LaunchScreen.storyboard */,
@@ -96,7 +96,7 @@
 				TargetAttributes = {
 					2FCA4DA11F025236004754A3 = {
 						CreatedOnToolsVersion = 8.3.2;
-						DevelopmentTeam = 499VY3GCQH;
+						DevelopmentTeam = Z5G3WDJ23W;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -137,7 +137,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2FCA4DA81F025236004754A3 /* ViewController.swift in Sources */,
+				2FCA4DA81F025236004754A3 /* CameraViewController.swift in Sources */,
 				2FCA4DA61F025236004754A3 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -263,13 +263,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = 499VY3GCQH;
+				DEVELOPMENT_TEAM = Z5G3WDJ23W;
 				INFOPLIST_FILE = CustomCamera/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.chernyshenko.CustomCamera;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -277,13 +278,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = 499VY3GCQH;
+				DEVELOPMENT_TEAM = Z5G3WDJ23W;
 				INFOPLIST_FILE = CustomCamera/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.chernyshenko.CustomCamera;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -306,6 +308,7 @@
 				2FCA4DB61F025236004754A3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
