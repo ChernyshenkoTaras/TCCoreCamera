@@ -22,7 +22,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Izz-8k-wEA">
-                                <rect key="frame" x="162" y="573" width="50" height="50"/>
+                                <rect key="frame" x="162" y="593" width="50" height="50"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="50" id="LwP-7k-Lrl"/>
                                     <constraint firstAttribute="width" constant="50" id="XEA-Hf-Pdk"/>
@@ -36,17 +36,14 @@
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="Izz-8k-wEA" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="H0d-j3-e1S"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Izz-8k-wEA" secondAttribute="bottom" constant="44" id="sao-uu-LYU"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Izz-8k-wEA" secondAttribute="bottom" constant="24" id="sao-uu-LYU"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="7oU-2H-Skw"/>
-                    <connections>
-                        <outlet property="recordingButton" destination="Izz-8k-wEA" id="7Kz-8l-iTT"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="258" y="164"/>
+            <point key="canvasLocation" x="256.80000000000001" y="163.26836581709148"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="U4l-4s-h1H">
