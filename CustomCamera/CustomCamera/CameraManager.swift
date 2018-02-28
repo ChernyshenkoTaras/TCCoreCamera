@@ -50,9 +50,9 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
             AVVideoWidthKey : view.frame.width,
             AVVideoHeightKey : view.frame.height
         ]
-        self.audioWriterInput = AVAssetWriterInput(mediaType: AVMediaTypeAudio,
+        self.audioWriterInput = AVAssetWriterInput(mediaType: .audio,
             outputSettings: self.audioSettings)
-        self.videoWriterInput = AVAssetWriterInput(mediaType: AVMediaTypeVideo,
+        self.videoWriterInput = AVAssetWriterInput(mediaType: .video,
             outputSettings: self.videoSettings)
         super.init()
         self.updateFileStorage(with: self.mode)
@@ -105,24 +105,24 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     }
     
     private func initialize() {
-        self.session.sessionPreset = AVCaptureSessionPresetHigh
+        self.session.sessionPreset = .high
         self.videoWriterInput.expectsMediaDataInRealTime = true
         self.audioWriterInput.expectsMediaDataInRealTime = true
         do {
-            let videoDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
-            self.deviceInput = try AVCaptureDeviceInput(device: videoDevice)
+            let videoDevice = AVCaptureDevice.default(for: .video)
+            self.deviceInput = try AVCaptureDeviceInput(device: videoDevice!)
         } catch {
             assertionFailure(error.localizedDescription)
         }
-        if self.session.canAddInput(self.deviceInput) {
-            self.session.addInput(self.deviceInput)
+        if self.session.canAddInput(self.deviceInput!) {
+            self.session.addInput(self.deviceInput!)
         }
     }
     
     private func configureWriters() {
         do {
             if let fileURL = self.recordingURL {
-                self.assetWriter = try AVAssetWriter(outputURL: fileURL, fileType: AVFileTypeQuickTimeMovie)
+                self.assetWriter = try AVAssetWriter(outputURL: fileURL, fileType: .mov)
             }
         } catch {
             print(error.localizedDescription)
@@ -142,7 +142,7 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     private func configurePreview() {
         let previewLayer: AVCaptureVideoPreviewLayer = AVCaptureVideoPreviewLayer(session: self.session)
         //importent line of code what will did a trick
-        previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
+        previewLayer.videoGravity = .resizeAspectFill
         let rootLayer = self.view.layer
         rootLayer.masksToBounds = true
         previewLayer.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
@@ -157,17 +157,17 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
             if self.session.canAddOutput(self.videoOutput) {
                 self.session.addOutput(self.videoOutput)
             }
-            if let videoConnection = self.videoOutput.connection(withMediaType: AVMediaTypeVideo) {
+            if let videoConnection = self.videoOutput.connection(with: .video) {
                 if videoConnection.isVideoStabilizationSupported {
                     videoConnection.preferredVideoStabilizationMode = .auto
                 }
                 videoConnection.videoOrientation = .portrait
             }
             self.session.commitConfiguration()
-            let audioDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeAudio)
-            let audioIn = try? AVCaptureDeviceInput(device: audioDevice)
-            if self.session.canAddInput(audioIn) {
-                self.session.addInput(audioIn)
+            let audioDevice = AVCaptureDevice.default(for: .audio)
+            let audioIn = try? AVCaptureDeviceInput(device: audioDevice!)
+            if self.session.canAddInput(audioIn!) {
+                self.session.addInput(audioIn!)
             }
             if self.session.canAddOutput(self.audioOutput) {
                 self.session.addOutput(self.audioOutput)
@@ -175,8 +175,8 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         }
     }
     
-    func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer
-        sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
+    func captureOutput(_ captureOutput: AVCaptureOutput, didOutput
+        sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         if !self.isRecordingSessionStarted {
             let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
             self.assetWriter?.startSession(atSourceTime: presentationTime)
