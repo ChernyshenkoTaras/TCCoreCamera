@@ -21,25 +21,59 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Izz-8k-wEA">
-                                <rect key="frame" x="162" y="593" width="50" height="50"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PyD-nP-HEi">
+                                <rect key="frame" x="155" y="587" width="64" height="64"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ghT-5A-2Sp">
+                                        <rect key="frame" x="1" y="1" width="62" height="62"/>
+                                        <subviews>
+                                            <view alpha="0.20000000000000001" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eFF-OU-xoO">
+                                                <rect key="frame" x="0.0" y="0.0" width="62" height="62"/>
+                                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            </view>
+                                        </subviews>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="bottom" secondItem="eFF-OU-xoO" secondAttribute="bottom" id="Dnv-p9-RLb"/>
+                                            <constraint firstItem="eFF-OU-xoO" firstAttribute="top" secondItem="ghT-5A-2Sp" secondAttribute="top" id="VWJ-EO-ewT"/>
+                                            <constraint firstItem="eFF-OU-xoO" firstAttribute="leading" secondItem="ghT-5A-2Sp" secondAttribute="leading" id="fSA-s6-O6k"/>
+                                            <constraint firstAttribute="trailing" secondItem="eFF-OU-xoO" secondAttribute="trailing" id="mPD-1o-MHg"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="50" id="LwP-7k-Lrl"/>
-                                    <constraint firstAttribute="width" constant="50" id="XEA-Hf-Pdk"/>
+                                    <constraint firstAttribute="width" constant="64" id="2PU-QF-zQR"/>
+                                    <constraint firstAttribute="trailing" secondItem="ghT-5A-2Sp" secondAttribute="trailing" constant="1" id="3hV-gf-UEx"/>
+                                    <constraint firstAttribute="height" constant="64" id="6hq-mZ-5JX"/>
+                                    <constraint firstAttribute="bottom" secondItem="ghT-5A-2Sp" secondAttribute="bottom" constant="1" id="Wpb-B0-enX"/>
+                                    <constraint firstItem="ghT-5A-2Sp" firstAttribute="leading" secondItem="PyD-nP-HEi" secondAttribute="leading" constant="1" id="jCu-9n-nBZ"/>
+                                    <constraint firstItem="ghT-5A-2Sp" firstAttribute="top" secondItem="PyD-nP-HEi" secondAttribute="top" constant="1" id="pTt-Iz-x10"/>
                                 </constraints>
-                                <state key="normal" image="record"/>
+                            </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Lp3-Ny-3pM">
+                                <rect key="frame" x="155" y="587" width="64" height="64"/>
                                 <connections>
-                                    <action selector="recordingButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ydC-EJ-oa6"/>
+                                    <action selector="recordingButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="4TU-Ti-yRF"/>
                                 </connections>
                             </button>
                         </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="Izz-8k-wEA" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="H0d-j3-e1S"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Izz-8k-wEA" secondAttribute="bottom" constant="24" id="sao-uu-LYU"/>
+                            <constraint firstItem="PyD-nP-HEi" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="51f-fD-jwA"/>
+                            <constraint firstItem="Lp3-Ny-3pM" firstAttribute="bottom" secondItem="PyD-nP-HEi" secondAttribute="bottom" id="BH8-jN-C50"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="PyD-nP-HEi" secondAttribute="bottom" constant="16" id="Im2-E4-vck"/>
+                            <constraint firstItem="Lp3-Ny-3pM" firstAttribute="leading" secondItem="PyD-nP-HEi" secondAttribute="leading" id="dnV-db-4u6"/>
+                            <constraint firstItem="Lp3-Ny-3pM" firstAttribute="trailing" secondItem="PyD-nP-HEi" secondAttribute="trailing" id="pkB-Rf-VG2"/>
+                            <constraint firstItem="Lp3-Ny-3pM" firstAttribute="top" secondItem="PyD-nP-HEi" secondAttribute="top" id="x76-aa-yaN"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="7oU-2H-Skw"/>
+                    <connections>
+                        <outlet property="innerView" destination="eFF-OU-xoO" id="rEZ-Aw-Kbq"/>
+                        <outlet property="middleView" destination="ghT-5A-2Sp" id="RGM-UM-rqQ"/>
+                        <outlet property="topView" destination="PyD-nP-HEi" id="MJU-2P-99D"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
@@ -62,7 +96,4 @@
             <point key="canvasLocation" x="-482" y="165"/>
         </scene>
     </scenes>
-    <resources>
-        <image name="record" width="64" height="64"/>
-    </resources>
 </document>
