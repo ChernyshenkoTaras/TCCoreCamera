@@ -13,6 +13,11 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     AVCaptureVideoDataOutputSampleBufferDelegate {
     typealias Completion = (URL) -> Void
     
+    private enum CameraMode {
+        case photo
+        case camera
+    }
+    
     private let recordingQueue = DispatchQueue(label: "recording.queue")
     private let audioSettings: [String : Any]
     private let videoSettings: [String : Any]
@@ -22,11 +27,6 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     private let videoOutput: AVCaptureVideoDataOutput = AVCaptureVideoDataOutput()
     private let audioOutput: AVCaptureAudioDataOutput = AVCaptureAudioDataOutput()
     private let session: AVCaptureSession = AVCaptureSession()
-    
-    private enum CameraMode {
-        case photo
-        case camera
-    }
 
     private var deviceInput: AVCaptureDeviceInput?
     private var previewLayer: AVCaptureVideoPreviewLayer?
@@ -62,6 +62,33 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         self.configureSession()
     }
     
+    open func startRecording() {
+        self.configureWriters()
+        self.updateFileStorage(with: self.mode)
+        guard let assetWriter = self.assetWriter else {
+            assertionFailure("AssetWriter was not initialized")
+            return
+        }
+        if !assetWriter.startWriting() {
+            assertionFailure("AssetWriter error: \(assetWriter.error.debugDescription)")
+        }
+        self.isRecording = true
+        self.videoOutput.setSampleBufferDelegate(self, queue: self.recordingQueue)
+        self.audioOutput.setSampleBufferDelegate(self, queue: self.recordingQueue)
+    }
+    
+    open func stopRecording() {
+        self.videoOutput.setSampleBufferDelegate(nil, queue: nil)
+        self.audioOutput.setSampleBufferDelegate(nil, queue: nil)
+        self.assetWriter?.finishWriting {
+            if let fileURL = self.recordingURL {
+                self.completion?(fileURL)
+            }
+            self.isRecording = false
+            self.isRecordingSessionStarted = false
+        }
+    }
+    
     private func updateFileStorage(with mode: CameraMode) {
         var fileURL: URL
         switch mode {
@@ -81,14 +108,12 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         self.session.sessionPreset = AVCaptureSessionPresetHigh
         self.videoWriterInput.expectsMediaDataInRealTime = true
         self.audioWriterInput.expectsMediaDataInRealTime = true
-        
         do {
             let videoDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
             self.deviceInput = try AVCaptureDeviceInput(device: videoDevice)
         } catch {
-            print(error.localizedDescription)
+            assertionFailure(error.localizedDescription)
         }
-        
         if self.session.canAddInput(self.deviceInput) {
             self.session.addInput(self.deviceInput)
         }
@@ -132,73 +157,43 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
             if self.session.canAddOutput(self.videoOutput) {
                 self.session.addOutput(self.videoOutput)
             }
-            
             if let videoConnection = self.videoOutput.connection(withMediaType: AVMediaTypeVideo) {
                 if videoConnection.isVideoStabilizationSupported {
                     videoConnection.preferredVideoStabilizationMode = .auto
                 }
                 videoConnection.videoOrientation = .portrait
             }
-            
             self.session.commitConfiguration()
             let audioDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeAudio)
             let audioIn = try? AVCaptureDeviceInput(device: audioDevice)
-            
             if self.session.canAddInput(audioIn) {
                 self.session.addInput(audioIn)
             }
-            
             if self.session.canAddOutput(self.audioOutput) {
                 self.session.addOutput(self.audioOutput)
             }
         }
     }
     
-    open func startRecording() {
-        self.configureWriters()
-        self.updateFileStorage(with: self.mode)
-        guard let assetWriter = self.assetWriter else {
-            assertionFailure("AssetWriter was not initialized")
-            return
-        }
-        if !assetWriter.startWriting() {
-            print("AssetWriter error: \(assetWriter.error.debugDescription)")
-        }
-        self.isRecording = true
-        self.videoOutput.setSampleBufferDelegate(self, queue: self.recordingQueue)
-        self.audioOutput.setSampleBufferDelegate(self, queue: self.recordingQueue)
-    }
-    
-    open func stopRecording() {
-        self.videoOutput.setSampleBufferDelegate(nil, queue: nil)
-        self.audioOutput.setSampleBufferDelegate(nil, queue: nil)
-        
-        self.assetWriter?.finishWriting {
-            if let fileURL = self.recordingURL {
-                self.completion?(fileURL)
-            }
-            self.isRecording = false
-            self.isRecordingSessionStarted = false
-        }
-    }
-    
     func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer
         sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
-        
         if !self.isRecordingSessionStarted {
             let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
             self.assetWriter?.startSession(atSourceTime: presentationTime)
             self.isRecordingSessionStarted = true
         }
-        
-        let description = CMSampleBufferGetFormatDescription(sampleBuffer)!
-        
-        if CMFormatDescriptionGetMediaType(description) == kCMMediaType_Audio {
+        self.appendSampleBuffer(sampleBuffer)
+    }
+    
+    private func appendSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
+        let description = CMFormatDescriptionGetMediaType(CMSampleBufferGetFormatDescription(sampleBuffer)!)
+        switch description {
+        case kCMMediaType_Audio:
             if self.audioWriterInput.isReadyForMoreMediaData {
                 print("appendSampleBuffer audio");
                 self.audioWriterInput.append(sampleBuffer)
             }
-        } else {
+        default:
             if self.videoWriterInput.isReadyForMoreMediaData {
                 print("appendSampleBuffer video");
                 if !self.videoWriterInput.append(sampleBuffer) {
