@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import AVFoundation
 import Photos
 
 class CameraViewController: UIViewController {
@@ -25,6 +24,10 @@ class CameraViewController: UIViewController {
             cameraManager.startRecording()
             self.setupStopButton()
         }
+    }
+   
+    @IBAction private func flipButtonPressed(_ button: UIButton) {
+        self.cameraManager?.flip()
     }
     
     private var cameraManager: CameraManager?

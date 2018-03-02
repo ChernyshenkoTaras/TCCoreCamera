@@ -13,9 +13,14 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     AVCaptureVideoDataOutputSampleBufferDelegate {
     typealias Completion = (URL) -> Void
     
-    private enum CameraMode {
+    public enum CameraType {
         case photo
         case camera
+    }
+    
+    public enum CameraPosition {
+        case front
+        case back
     }
     
     private let recordingQueue = DispatchQueue(label: "recording.queue")
@@ -27,15 +32,15 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     private let videoOutput: AVCaptureVideoDataOutput = AVCaptureVideoDataOutput()
     private let audioOutput: AVCaptureAudioDataOutput = AVCaptureAudioDataOutput()
     private let session: AVCaptureSession = AVCaptureSession()
-
+    
     private var deviceInput: AVCaptureDeviceInput?
     private var previewLayer: AVCaptureVideoPreviewLayer?
     private var assetWriter: AVAssetWriter?
     private var recordingURL: URL?
     private(set) var isRecording: Bool = false
     private var isRecordingSessionStarted: Bool = false
-    private var mode: CameraMode = .camera
-    
+    private(set) var camereType: CameraType = .camera
+    private(set) var cameraPosition: CameraPosition = .back
     open var completion: Completion?
     
     init(view: UIView) {
@@ -55,7 +60,7 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         self.videoWriterInput = AVAssetWriterInput(mediaType: .video,
             outputSettings: self.videoSettings)
         super.init()
-        self.updateFileStorage(with: self.mode)
+        self.updateFileStorage(with: self.camereType)
         self.initialize()
         self.configureWriters()
         self.configurePreview()
@@ -64,7 +69,7 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     
     open func startRecording() {
         self.configureWriters()
-        self.updateFileStorage(with: self.mode)
+        self.updateFileStorage(with: self.camereType)
         guard let assetWriter = self.assetWriter else {
             assertionFailure("AssetWriter was not initialized")
             return
@@ -89,7 +94,20 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         }
     }
     
-    private func updateFileStorage(with mode: CameraMode) {
+    open func flip() {
+        switch self.cameraPosition {
+            case .front:
+                self.cameraPosition = .back
+                self.addVideoInput(position: .back)
+            case .back:
+                self.cameraPosition = .front
+                self.addVideoInput(position: .front)
+        }
+        //TODO: we need to configure AVCaptureConnection videoOrientation. It's a temporary solution
+        self.configureSession()
+    }
+    
+    private func updateFileStorage(with mode: CameraType) {
         var fileURL: URL
         switch mode {
         case .camera:
@@ -108,14 +126,25 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         self.session.sessionPreset = .high
         self.videoWriterInput.expectsMediaDataInRealTime = true
         self.audioWriterInput.expectsMediaDataInRealTime = true
-        do {
-            let videoDevice = AVCaptureDevice.default(for: .video)
-            self.deviceInput = try AVCaptureDeviceInput(device: videoDevice!)
-        } catch {
-            assertionFailure(error.localizedDescription)
+        self.cameraPosition = .back
+        self.addVideoInput(position: .back)
+    }
+    
+    func addVideoInput(position: AVCaptureDevice.Position) {
+        guard let device: AVCaptureDevice = AVCaptureDevice.default(.builtInWideAngleCamera,
+            for: .video, position: position) else { return }
+        if let currentInput = self.deviceInput {
+            self.session.removeInput(currentInput)
+            self.deviceInput = nil
         }
-        if self.session.canAddInput(self.deviceInput!) {
-            self.session.addInput(self.deviceInput!)
+        do {
+            let input = try AVCaptureDeviceInput(device: device)
+            if self.session.canAddInput(input) {
+                self.session.addInput(input)
+                self.deviceInput = input
+            }
+        } catch {
+            print(error)
         }
     }
     
