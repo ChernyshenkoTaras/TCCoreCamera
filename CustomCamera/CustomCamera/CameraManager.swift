@@ -41,7 +41,24 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     private var isRecordingSessionStarted: Bool = false
     private(set) var camereType: CameraType = .camera
     private(set) var cameraPosition: CameraPosition = .back
+    private(set) var zoomFactor: CGFloat = 1.0 {
+        didSet {
+            if self.zoomFactor < 1.0 || self.zoomFactor > self.maxZoomFactor { return }
+            if let device = self.deviceInput?.device {
+                do {
+                    try device.lockForConfiguration()
+                    device.ramp(toVideoZoomFactor: self.zoomFactor, withRate: 3.0)
+                    device.unlockForConfiguration()
+                }
+                catch {
+                    print(error.localizedDescription)
+                }
+            }
+        }
+    }
+    
     open var completion: Completion?
+    open var maxZoomFactor: CGFloat = 10.0
     
     init(view: UIView) {
         self.view = view
@@ -105,6 +122,18 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         }
         //TODO: we need to configure AVCaptureConnection videoOrientation. It's a temporary solution
         self.configureSession()
+    }
+    
+    open func zoomIn() {
+        if self.zoomFactor < self.maxZoomFactor {
+            self.zoomFactor = self.zoomFactor + 0.035
+        }
+    }
+    
+    open func zoomOut() {
+        if self.zoomFactor > 1.0 {
+            self.zoomFactor = self.zoomFactor - 0.035
+        }
     }
     
     private func updateFileStorage(with mode: CameraType) {

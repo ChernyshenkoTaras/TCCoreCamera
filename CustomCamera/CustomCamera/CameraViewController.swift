@@ -35,6 +35,8 @@ class CameraViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden = true
+        let gesture = UIPanGestureRecognizer(target: self, action: #selector(zoomingGesture(gesture:)))
+        self.view.addGestureRecognizer(gesture)
         self.setupStartButton()
     }
     
@@ -47,6 +49,14 @@ class CameraViewController: UIViewController {
         }
     }
     
+    @objc private func zoomingGesture(gesture: UIPanGestureRecognizer) {
+        let velocity = gesture.velocity(in: self.view)
+        if velocity.y > 0 {
+            self.cameraManager?.zoomOut()
+        } else {
+            self.cameraManager?.zoomIn()
+        }
+    }
     private func setupStartButton() {
         self.topView?.layer.borderWidth = 1.0
         self.topView?.layer.borderColor = UIColor.darkGray.cgColor
