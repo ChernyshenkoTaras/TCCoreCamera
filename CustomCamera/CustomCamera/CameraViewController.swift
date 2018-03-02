@@ -37,6 +37,14 @@ class CameraViewController: UIViewController {
         self.navigationController?.isNavigationBarHidden = true
         let gesture = UIPanGestureRecognizer(target: self, action: #selector(zoomingGesture(gesture:)))
         self.view.addGestureRecognizer(gesture)
+        self.topView?.layer.borderWidth = 1.0
+        self.topView?.layer.borderColor = UIColor.darkGray.cgColor
+        self.topView?.layer.cornerRadius = 32
+        self.middleView?.layer.borderWidth = 4.0
+        self.middleView?.layer.borderColor = UIColor.white.cgColor
+        self.middleView?.layer.cornerRadius = 32
+        self.innerView?.layer.borderWidth = 32.0
+        self.innerView?.layer.cornerRadius = 32
         self.setupStartButton()
     }
     
@@ -68,15 +76,8 @@ class CameraViewController: UIViewController {
         }
     }
     private func setupStartButton() {
-        self.topView?.layer.borderWidth = 1.0
-        self.topView?.layer.borderColor = UIColor.darkGray.cgColor
-        self.topView?.layer.cornerRadius = 32
         self.topView?.backgroundColor = UIColor.clear
-        
-        self.middleView?.layer.borderWidth = 4.0
-        self.middleView?.layer.borderColor = UIColor.white.cgColor
         self.middleView?.backgroundColor = UIColor.clear
-        self.middleView?.layer.cornerRadius = 32
         
         self.innerView?.layer.borderWidth = 32.0
         self.innerView?.layer.borderColor = UIColor.white.cgColor
@@ -86,19 +87,10 @@ class CameraViewController: UIViewController {
     }
     
     private func setupStopButton() {
-        self.topView?.layer.borderWidth = 1.0
-        self.topView?.layer.borderColor = UIColor.darkGray.cgColor
-        self.topView?.layer.cornerRadius = 32
         self.topView?.backgroundColor = UIColor.white
-        
-        self.middleView?.layer.borderWidth = 4.0
-        self.middleView?.layer.borderColor = UIColor.white.cgColor
         self.middleView?.backgroundColor = UIColor.white
-        self.middleView?.layer.cornerRadius = 32
         
-        self.innerView?.layer.borderWidth = 32.0
         self.innerView?.layer.borderColor = UIColor.red.cgColor
-        self.innerView?.layer.cornerRadius = 32
         self.innerView?.backgroundColor = UIColor.red
         self.innerView?.alpha = 1.0
     }
