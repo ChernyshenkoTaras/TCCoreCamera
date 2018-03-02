@@ -69,8 +69,8 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         ]
         self.videoSettings  = [
             AVVideoCodecKey : AVVideoCodecH264,
-            AVVideoWidthKey : view.frame.width,
-            AVVideoHeightKey : view.frame.height
+            AVVideoWidthKey : 2 * view.frame.width,
+            AVVideoHeightKey : 2 * view.frame.height
         ]
         self.audioWriterInput = AVAssetWriterInput(mediaType: .audio,
             outputSettings: self.audioSettings)
