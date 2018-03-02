@@ -47,6 +47,16 @@ class CameraViewController: UIViewController {
             self.saveInPhotoLibrary(with: fileURL)
             print("finished writing to \(fileURL.absoluteString)")
         }
+        self.cameraManager?.photoCompletion = { [weak self] (image) in
+            do {
+                try PHPhotoLibrary.shared().performChangesAndWait {
+                    PHAssetChangeRequest.creationRequestForAsset(from: image)
+                }
+                self?.setupStartButton()
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
     }
     
     @objc private func zoomingGesture(gesture: UIPanGestureRecognizer) {

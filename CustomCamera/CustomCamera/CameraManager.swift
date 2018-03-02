@@ -10,8 +10,9 @@ import UIKit
 import AVFoundation
 
 class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
-    AVCaptureVideoDataOutputSampleBufferDelegate {
+    AVCaptureVideoDataOutputSampleBufferDelegate, AVCapturePhotoCaptureDelegate {
     typealias Completion = (URL) -> Void
+    typealias PhotoCompletion = (UIImage) -> Void
     
     public enum CameraType {
         case photo
@@ -29,6 +30,7 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     private let view: UIView
     private let audioWriterInput: AVAssetWriterInput
     private let videoWriterInput: AVAssetWriterInput
+    private let photoOutput: AVCapturePhotoOutput = AVCapturePhotoOutput()
     private let videoOutput: AVCaptureVideoDataOutput = AVCaptureVideoDataOutput()
     private let audioOutput: AVCaptureAudioDataOutput = AVCaptureAudioDataOutput()
     private let session: AVCaptureSession = AVCaptureSession()
@@ -39,7 +41,7 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     private var recordingURL: URL?
     private(set) var isRecording: Bool = false
     private var isRecordingSessionStarted: Bool = false
-    private(set) var camereType: CameraType = .camera
+    private(set) var camereType: CameraType = .photo
     private(set) var cameraPosition: CameraPosition = .back
     private(set) var zoomFactor: CGFloat = 1.0 {
         didSet {
@@ -58,6 +60,8 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     }
     
     open var completion: Completion?
+    open var photoCompletion: PhotoCompletion?
+    
     open var maxZoomFactor: CGFloat = 10.0
     
     init(view: UIView) {
@@ -85,18 +89,24 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     }
     
     open func startRecording() {
-        self.configureWriters()
-        self.updateFileStorage(with: self.camereType)
-        guard let assetWriter = self.assetWriter else {
-            assertionFailure("AssetWriter was not initialized")
-            return
+        switch self.camereType {
+            case .photo:
+                let settings = AVCapturePhotoSettings()
+                self.photoOutput.capturePhoto(with: settings, delegate: self)
+            case .camera:
+                self.configureWriters()
+                self.updateFileStorage(with: self.camereType)
+                guard let assetWriter = self.assetWriter else {
+                    assertionFailure("AssetWriter was not initialized")
+                    return
+                }
+                if !assetWriter.startWriting() {
+                    assertionFailure("AssetWriter error: \(assetWriter.error.debugDescription)")
+                }
+                self.isRecording = true
+                self.videoOutput.setSampleBufferDelegate(self, queue: self.recordingQueue)
+                self.audioOutput.setSampleBufferDelegate(self, queue: self.recordingQueue)
         }
-        if !assetWriter.startWriting() {
-            assertionFailure("AssetWriter error: \(assetWriter.error.debugDescription)")
-        }
-        self.isRecording = true
-        self.videoOutput.setSampleBufferDelegate(self, queue: self.recordingQueue)
-        self.audioOutput.setSampleBufferDelegate(self, queue: self.recordingQueue)
     }
     
     open func stopRecording() {
@@ -155,6 +165,9 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         self.session.sessionPreset = .high
         self.videoWriterInput.expectsMediaDataInRealTime = true
         self.audioWriterInput.expectsMediaDataInRealTime = true
+        self.photoOutput.setPreparedPhotoSettingsArray([
+            AVCapturePhotoSettings(format: [AVVideoCodecKey : AVVideoCodecJPEG])
+        ], completionHandler: nil)
         self.cameraPosition = .back
         self.addVideoInput(position: .back)
     }
@@ -212,6 +225,9 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     private func configureSession() {
         DispatchQueue.main.async {
             self.session.beginConfiguration()
+            if self.session.canAddOutput(self.photoOutput) {
+                self.session.addOutput(self.photoOutput)
+            }
             if self.session.canAddOutput(self.videoOutput) {
                 self.session.addOutput(self.videoOutput)
             }
@@ -241,6 +257,16 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
             self.isRecordingSessionStarted = true
         }
         self.appendSampleBuffer(sampleBuffer)
+    }
+    
+    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photoSampleBuffer: CMSampleBuffer?, previewPhoto previewPhotoSampleBuffer: CMSampleBuffer?, resolvedSettings: AVCaptureResolvedPhotoSettings, bracketSettings: AVCaptureBracketedStillImageSettings?, error: Error?) {
+        if let buffer = photoSampleBuffer, let data = AVCapturePhotoOutput.jpegPhotoDataRepresentation(forJPEGSampleBuffer: buffer, previewPhotoSampleBuffer: nil),
+            let image = UIImage(data: data) {
+            self.photoCompletion?(image)
+        }
+    }
+    func photoOutput(_ output: AVCapturePhotoOutput, didCapturePhotoFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
+        
     }
     
     private func appendSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
