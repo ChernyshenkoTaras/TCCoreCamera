@@ -9,14 +9,14 @@
 import UIKit
 import AVFoundation
 
-class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
+class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     AVCaptureVideoDataOutputSampleBufferDelegate, AVCapturePhotoCaptureDelegate {
-    typealias Completion = (URL) -> Void
+    typealias VideoCompletion = (URL) -> Void
     typealias PhotoCompletion = (UIImage) -> Void
     
     public enum CameraType {
         case photo
-        case camera
+        case video
     }
     
     public enum CameraPosition {
@@ -41,7 +41,6 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     private var recordingURL: URL?
     private(set) var isRecording: Bool = false
     private var isRecordingSessionStarted: Bool = false
-    private(set) var camereType: CameraType = .photo
     private(set) var cameraPosition: CameraPosition = .back
     private(set) var zoomFactor: CGFloat = 1.0 {
         didSet {
@@ -59,8 +58,13 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         }
     }
     
-    open var completion: Completion?
+    open var videoCompletion: VideoCompletion?
     open var photoCompletion: PhotoCompletion?
+    open var camereType: CameraType = .photo {
+        didSet {
+            self.updateFileStorage(with: self.camereType)
+        }
+    }
     
     open var maxZoomFactor: CGFloat = 10.0
     
@@ -93,7 +97,7 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
             case .photo:
                 let settings = AVCapturePhotoSettings()
                 self.photoOutput.capturePhoto(with: settings, delegate: self)
-            case .camera:
+            case .video:
                 self.configureWriters()
                 self.updateFileStorage(with: self.camereType)
                 guard let assetWriter = self.assetWriter else {
@@ -114,7 +118,7 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         self.audioOutput.setSampleBufferDelegate(nil, queue: nil)
         self.assetWriter?.finishWriting {
             if let fileURL = self.recordingURL {
-                self.completion?(fileURL)
+                self.videoCompletion?(fileURL)
             }
             self.isRecording = false
             self.isRecordingSessionStarted = false
@@ -149,7 +153,7 @@ class CameraManager: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     private func updateFileStorage(with mode: CameraType) {
         var fileURL: URL
         switch mode {
-        case .camera:
+        case .video:
             fileURL = URL(fileURLWithPath: "\(NSTemporaryDirectory() as String)/video.mov")
         case .photo:
             fileURL = URL(fileURLWithPath: "\(NSTemporaryDirectory() as String)/image.mp4")

@@ -30,7 +30,7 @@ class CameraViewController: UIViewController {
         self.cameraManager?.flip()
     }
     
-    private var cameraManager: CameraManager?
+    private var cameraManager: TCCoreCamera?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,8 +50,8 @@ class CameraViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.cameraManager = CameraManager(view: self.view)
-        self.cameraManager?.completion = { (fileURL) in
+        self.cameraManager = TCCoreCamera(view: self.view)
+        self.cameraManager?.videoCompletion = { (fileURL) in
             self.saveInPhotoLibrary(with: fileURL)
             print("finished writing to \(fileURL.absoluteString)")
         }
@@ -65,6 +65,7 @@ class CameraViewController: UIViewController {
                 print(error.localizedDescription)
             }
         }
+        self.cameraManager?.camereType = .video
     }
     
     @objc private func zoomingGesture(gesture: UIPanGestureRecognizer) {
