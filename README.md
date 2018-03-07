@@ -1,6 +1,8 @@
 # TCCoreCamera
 
-Swift Library based on AVFoundation that allow to easily add camera feature with custom UI into your project.
+Would you like to create your camera same as Snapchat or Instagram? I think this library could help you. Basicly it is a wrapper above AVFoundation that allows you to use camera feature without extra setup. Build your own UI with buttons/sliders/anything else exactly like you want and just assign appropriate actions to them.
+
+Library is under development, so I will appreciate your suggestions, bug reports and stars ;)
 
 ## How to install
 
