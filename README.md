@@ -1,4 +1,4 @@
-# TCCoreCamera
+<p align="center"><img src="logo/logotype-a.png"></p>
 
 Would you like to create your camera same as Snapchat or Instagram? I think this library could help you. Basicly it is a wrapper above AVFoundation that allows you to use camera feature without extra setup. Build your own UI with buttons/sliders/anything else exactly like you want and just assign appropriate actions to them.
 
